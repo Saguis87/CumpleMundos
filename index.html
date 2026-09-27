@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fffdf6">
+  <meta name="description" content="Un calendario compartido de cumplea9os para celebrar juntos.">
+  <title>CumpleMundos | Un mundo para celebrar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #292719;
+      --muted: #777364;
+      --paper: #fffefa;
+      --sun: #f3c933;
+      --sun-dark: #815f00;
+      --sun-light: #fff4c3;
+      --line: #eeeadd;
+      --green: #427461;
+      --red: #a13e36;
+      --font-body: "DM Sans", sans-serif;
+      --font-display: "Fraunces", Georgia, serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(#e9e4d6 0.7px, transparent 0.7px);
+      background-size: 20px 20px;
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    button, input { font: inherit; }
+    button:focus-visible, input:focus-visible, a:focus-visible {
+      outline: 3px solid #b68a08;
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 10;
+      top: 8px;
+      left: 8px;
+      padding: 10px 14px;
+      color: var(--ink);
+      background: white;
+      transform: translateY(-150%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .page-shell {
+      width: min(1220px, calc(100% - 48px));
+      margin-inline: auto;
+    }
+
+    .topbar {
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border: 1px solid #ead47e;
+      border-radius: 11px;
+      background: var(--sun-light);
+    }
+
+    .brand-mark svg { width: 20px; height: 20px; }
+    .topbar-note { color: var(--muted); font-size: 13px; }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 44px;
+      align-items: center;
+      padding-block: 52px 36px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 12px;
+      color: var(--sun-dark);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--sun);
+      content: "";
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { font-family: var(--font-display); }
+
+    h1 {
+      max-width: 640px;
+      margin-bottom: 12px;
+      font-size: 42px;
+      line-height: 1.05;
+    }
+
+    h1 span {
+      text-decoration: underline;
+      text-decoration-color: var(--sun);
+      text-decoration-thickness: 5px;
+      text-underline-offset: 6px;
+    }
+
+    .intro-copy {
+      max-width: 510px;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .sun-illustration {
+      display: grid;
+      min-height: 156px;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid #f0e4ad;
+      border-radius: 8px;
+      background: #fff8db;
+    }
+
+    .sun-illustration svg { width: 248px; height: 132px; }
+
+    .add-section {
+      display: grid;
+      grid-template-columns: 190px minmax(220px, 1fr) auto;
+      gap: 14px;
+      align-items: end;
+      padding: 22px;
+      border: 1px solid #e9e4d6;
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 7px 24px rgb(54 46 16 / 4%);
+    }
+
+    .form-heading { align-self: center; }
+
+    .form-heading h2 {
+      margin: 0 0 2px;
+      font-size: 21px;
+      line-height: 1.2;
+    }
+
+    .form-heading p { margin: 0; color: var(--muted); font-size: 13px; }
+    .field { display: grid; gap: 5px; }
+    .field label { font-size: 14px; font-weight: 700; }
+
+    .field input {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid #dedbcc;
+      border-radius: 5px;
+      color: var(--ink);
+      background: #fffefa;
+    }
+
+    .field input::placeholder { color: #a19b8b; }
+
+    .submit-button {
+      display: inline-flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border: 1px solid #e0b41c;
+      border-radius: 5px;
+      color: #332700;
+      background: var(--sun);
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 150ms ease, transform 150ms ease;
+    }
+
+    .submit-button:hover { background: #ffdc60; transform: translateY(-1px); }
+    .submit-button svg { width: 18px; height: 18px; }
+
+    .notice {
+      display: flex;
+      min-height: 46px;
+      align-items: center;
+      gap: 9px;
+      margin: 11px 1px 30px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .notice svg { flex: 0 0 17px; width: 17px; height: 17px; color: var(--green); }
+    .notice strong { color: var(--ink); }
+    .notice [role="status"] { margin-left: auto; color: var(--green); text-align: right; }
+
+    .calendar-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .calendar-header h2 { margin: 0; font-size: 29px; }
+
+    .popular-section { margin-bottom: 30px; }
+
+    .popular-list {
+      display: grid;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .popular-row {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) auto auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 52px;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--line);
+      background: white;
+    }
+
+    .popular-row:first-child { border-top: 1px solid var(--line); }
+    .popular-rank { color: var(--sun-dark); font-family: var(--font-display); font-size: 18px; font-weight: 700; text-align: center; }
+    .popular-date { font-weight: 600; }
+    .popular-count { color: var(--muted); font-size: 14px; }
+
+    .popular-open {
+      min-height: 36px;
+      padding: 5px 10px;
+      border: 1px solid #e4dfd1;
+      border-radius: 4px;
+      color: var(--ink);
+      background: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .popular-open:hover { background: #fff8db; }
+
+    .popular-empty {
+      padding: 12px 10px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+    }
+
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      padding-bottom: 45px;
+    }
+
+    .month-card {
+      min-width: 0;
+      scroll-margin-top: 16px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: white;
+      animation: arrive 350ms ease both;
+    }
+
+    .month-open {
+      display: flex;
+      width: 100%;
+      min-height: 184px;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 0;
+      border: 0;
+      border-radius: inherit;
+      color: inherit;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .month-open:hover { background: #fffdf5; }
+    .month-open:focus-visible { position: relative; z-index: 1; }
+
+    .month-card:nth-child(3n + 2) { animation-delay: 35ms; }
+    .month-card:nth-child(3n + 3) { animation-delay: 70ms; }
+
+    @keyframes arrive {
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .month-title {
+      display: flex;
+      min-height: 52px;
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 12px;
+      border-bottom: 1px solid #f1e8cb;
+      background: #fff9e7;
+    }
+
+    .month-name {
+      overflow: hidden;
+      font-size: 18px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+    }
+
+    .month-count {
+      flex: 0 0 auto;
+      display: grid;
+      min-width: 28px;
+      height: 28px;
+      place-items: center;
+      border-radius: 50%;
+      color: #745b13;
+      background: #f9e9a8;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .month-preview {
+      display: grid;
+      gap: 0;
+      padding: 6px 11px 0;
+    }
+
+    .month-preview-row {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      min-height: 38px;
+      padding-block: 5px;
+      border-bottom: 1px solid #f3f0e8;
+    }
+
+    .birthday-name {
+      min-width: 0;
+      flex: 1 1 auto;
+      overflow-wrap: anywhere;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .month-empty, .month-more, .month-open-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .month-empty { padding: 10px 0; }
+    .month-more { padding-top: 5px; }
+
+    .month-open-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: auto 11px 10px;
+      padding-top: 6px;
+      border-top: 1px solid #f3f0e8;
+      color: #76611d;
+      font-weight: 600;
+    }
+
+    .month-open-label span:last-child { font-size: 16px; }
+
+    .month-detail {
+      margin-bottom: 45px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: white;
+    }
+
+    .month-detail[hidden] { display: none; }
+
+    .detail-header {
+      display: flex;
+      min-height: 78px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .back-button {
+      display: inline-flex;
+      min-height: 38px;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border: 1px solid #e4dfd1;
+      border-radius: 4px;
+      color: var(--ink);
+      background: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .back-button:hover { background: #f8f6ef; }
+    .back-button svg { width: 16px; height: 16px; }
+
+    .detail-title { margin: 0; font-size: 26px; }
+    .detail-total { color: var(--muted); font-size: 15px; }
+
+    .calendar-scroll {
+      overflow-x: auto;
+      padding: 16px;
+      overscroll-behavior-x: contain;
+    }
+
+    .weekday-grid, .day-grid {
+      display: grid;
+      min-width: 700px;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 5px;
+    }
+
+    .weekday-grid { margin-bottom: 5px; }
+
+    .weekday-grid span {
+      padding: 5px 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: right;
+      text-transform: uppercase;
+    }
+
+    .day-cell {
+      min-width: 0;
+      min-height: 112px;
+      padding: 9px;
+      border: 1px solid #ebe8df;
+      border-radius: 4px;
+      background: #fff;
+    }
+
+    .day-cell.is-empty { border-color: transparent; background: transparent; }
+
+    .day-number {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      margin-bottom: 5px;
+      border-radius: 50%;
+      color: #494638;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .day-birthdays {
+      display: grid;
+      gap: 3px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .day-birthday {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      justify-content: space-between;
+      gap: 3px;
+      padding: 3px 4px;
+      border-left: 2px solid var(--sun);
+      background: #fff9e5;
+      font-size: 13px;
+    }
+
+    .day-birthday-name { min-width: 0; overflow-wrap: anywhere; }
+    .day-birthday .delete-button { width: 22px; height: 22px; flex-basis: 22px; }
+
+    .delete-button {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      flex: 0 0 30px;
+      place-items: center;
+      border: 0;
+      border-radius: 4px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    .delete-button:hover { color: var(--red); background: #fbefed; }
+
+    .empty-month {
+      margin: 0;
+      padding: 13px 12px;
+      color: #928d7d;
+      font-size: 12px;
+    }
+
+    .footer {
+      min-height: 52px;
+      padding-block: 15px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 840px) {
+      .intro { grid-template-columns: minmax(0, 1fr) 240px; gap: 24px; }
+      .add-section { grid-template-columns: 1fr 1fr; }
+      .form-heading { grid-column: 1 / -1; }
+      .submit-button { align-self: end; }
+      .month-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 600px) {
+      .page-shell { width: min(100% - 28px, 440px); }
+      .topbar { min-height: 62px; }
+      .topbar-note { font-size: 11px; }
+      .intro { grid-template-columns: 1fr; gap: 20px; padding-block: 34px 24px; }
+      h1 { max-width: 430px; font-size: 35px; }
+      .sun-illustration { min-height: 112px; }
+      .sun-illustration svg { width: 215px; height: 105px; }
+      .add-section { grid-template-columns: 1fr; gap: 12px; padding: 16px; }
+      .form-heading { grid-column: auto; }
+      .submit-button { width: 100%; }
+      .notice { align-items: flex-start; flex-wrap: wrap; margin-bottom: 25px; }
+      .notice [role="status"] { width: 100%; margin-left: 26px; text-align: left; }
+      .calendar-header { align-items: center; }
+      .calendar-header h2 { font-size: 24px; }
+      .popular-row { grid-template-columns: 26px minmax(0, 1fr) auto; gap: 8px; }
+      .popular-count { grid-column: 2; }
+      .popular-open { grid-column: 3; grid-row: 1 / span 2; }
+      .month-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+      .month-title { padding-inline: 9px; }
+      .month-title h3 { font-size: 16px; }
+      .birthday-name { font-size: 14px; }
+      .month-open { min-height: 176px; }
+      .month-preview { padding-inline: 8px; }
+      .month-open-label { margin-inline: 8px; }
+      .detail-header { align-items: flex-start; flex-direction: column; gap: 10px; padding: 13px; }
+      .calendar-scroll { padding: 10px; }
+      .day-cell { min-height: 88px; padding: 5px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#calendario">Saltar al calendario</a>
+  <header class="topbar page-shell">
+    <a class="brand" href="#inicio" aria-label="CumpleMundos, inicio">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="6" width="16" height="15" rx="2" />
+          <path d="M8 3v5M16 3v5M4 11h16M9 15h.01M12 15h.01M15 15h.01" />
+        </svg>
+      </span>
+      <span>CumpleMundos</span>
+    </a>
+    <span class="topbar-note">Calendario anual</span>
+  </header>
+
+  <main id="inicio" class="page-shell">
+    <section class="intro" aria-labelledby="main-title">
+      <div>
+        <p class="eyebrow">Fechas importantes</p>
+        <h1 id="main-title">Calendario de <span>cumplea&ntilde;os</span></h1>
+        <p class="intro-copy">A&ntilde;ade tu nombre y fecha de nacimiento. Abre cualquier mes para consultar los cumplea&ntilde;os d&iacute;a por d&iacute;a.</p>
+      </div>
+      <div class="sun-illustration" aria-hidden="true">
+        <svg viewBox="0 0 248 132" fill="none">
+          <path d="M8 113h232" stroke="#d7cda6" stroke-width="1.5" stroke-linecap="round" />
+          <path d="M44 87a36 36 0 0 1 72 0" stroke="#e9c442" stroke-width="13" stroke-linecap="round" />
+          <path d="M80 47V34m-28 25-9-9m65 9 9-9" stroke="#a48425" stroke-width="3" stroke-linecap="round" />
+          <rect x="93" y="62" width="96" height="58" rx="7" fill="#fffefa" stroke="#b4a77d" stroke-width="1.5" />
+          <path d="M94 77h94" stroke="#eadb9a" stroke-width="1.5" />
+          <path d="M111 54v17m60-17v17" stroke="#786843" stroke-width="4" stroke-linecap="round" />
+          <path d="M119 90h11m12 0h11m12 0h10m-56 13h11m12 0h11m12 0h10" stroke="#d9cc9f" stroke-width="4" stroke-linecap="round" />
+          <path d="M158 30c0 0-14 15 0 22 13-7 0-22 0-22Zm18 12c0 0-13 9-4 17 12-4 4-17 4-17Z" fill="#d97759" />
+          <path d="M162 51v9m12-4v6" stroke="#a85039" stroke-width="1.5" />
+          <circle cx="203" cy="45" r="5" fill="#95aa7c" />
+          <circle cx="211" cy="72" r="3" fill="#e8b549" />
+          <circle cx="30" cy="57" r="3" fill="#e8b549" />
+          <circle cx="57" cy="31" r="2.5" fill="#95aa7c" />
+        </svg>
+      </div>
+    </section>
+
+    <section aria-labelledby="form-title">
+      <form class="add-section" id="birthday-form">
+        <div class="form-heading">
+          <h2 id="form-title">A&ntilde;adir cumplea&ntilde;os</h2>
+          <p>Registra una fecha en el calendario.</p>
+        </div>
+        <div class="field">
+          <label for="birth-date">Fecha de nacimiento</label>
+          <input id="birth-date" name="date" type="date" autocomplete="bday" required>
+        </div>
+        <button class="submit-button" type="submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 5v14m-7-7h14" />
+          </svg>
+          Guardar cumplea&ntilde;os
+        </button>
+      </form>
+      <p class="notice">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+        <span><strong>Tus datos se guardan en este navegador.</strong> Para compartirlos entre todas las personas har&aacute; falta conectar una base de datos en l&iacute;nea.</span>
+        <span id="form-status" role="status" aria-live="polite"></span>
+      </p>
+    </section>
+
+    <section id="popular-section" class="popular-section" aria-labelledby="popular-heading">
+      <div class="calendar-header">
+        <h2 id="popular-heading">Fechas con m&aacute;s cumplea&ntilde;os</h2>
+        <span class="calendar-count">Top 5</span>
+      </div>
+      <ol id="popular-list" class="popular-list"></ol>
+    </section>
+
+    <div id="month-overview">
+      <section id="calendario" aria-labelledby="calendar-heading">
+      <div class="calendar-header">
+        <h2 id="calendar-heading">Cumplea&ntilde;os por mes</h2>
+        <span id="birthday-count" class="calendar-count" aria-live="polite">0 cumplea&ntilde;os</span>
+      </div>
+      <div id="month-grid" class="month-grid"></div>
+      </section>
+    </div>
+
+    <section id="month-detail" class="month-detail" aria-labelledby="selected-month-title" hidden>
+      <header class="detail-header">
+        <button id="back-to-months" class="back-button" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m15 18-6-6 6-6M9 12h12" />
+          </svg>
+          Todos los meses
+        </button>
+        <h2 id="selected-month-title" class="detail-title" tabindex="-1"></h2>
+        <span id="selected-month-count" class="detail-total"></span>
+      </header>
+      <div class="calendar-scroll" tabindex="0" aria-label="Calendario mensual. Desliza horizontalmente para ver todos los días.">
+        <div class="weekday-grid" aria-hidden="true">
+          <span>Lun</span><span>Mar</span><span>Mi&eacute;</span><span>Jue</span><span>Vie</span><span>S&aacute;b</span><span>Dom</span>
+        </div>
+        <div id="day-grid" class="day-grid" role="grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer page-shell">CumpleMundos &middot; Calendario anual</footer>
+
+  <script>
+    (() => {
+      const storageKey = "cumplemundos-birthdays-v1";
+      const months = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+      ];
+      const form = document.getElementById("birthday-form");
+      const dateInput = document.getElementById("birth-date");
+      const monthGrid = document.getElementById("month-grid");
+      const countLabel = document.getElementById("birthday-count");
+      const popularList = document.getElementById("popular-list");
+      const popularSection = document.getElementById("popular-section");
+      const monthOverview = document.getElementById("month-overview");
+      const monthDetail = document.getElementById("month-detail");
+      const selectedMonthTitle = document.getElementById("selected-month-title");
+      const selectedMonthCount = document.getElementById("selected-month-count");
+      const dayGrid = document.getElementById("day-grid");
+      const statusLabel = document.getElementById("form-status");
+      let activeMonth = null;
+      let birthdays = loadBirthdays();
+
+      function loadBirthdays() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(storageKey) || "[]");
+          return Array.isArray(saved)
+            ? saved.filter((entry) => typeof entry.id === "string"
+              && typeof entry.date === "string"
+              && /^\d{4}-\d{2}-\d{2}$/.test(entry.date))
+            : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveBirthdays() {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(birthdays));
+          return true;
+        } catch {
+          statusLabel.textContent = "No se pudo guardar. Revisa el espacio o los permisos del navegador.";
+          return false;
+        }
+      }
+
+      function getBirthdayCounts() {
+        const counts = {};
+        for (const birthday of birthdays) {
+          const dateKey = birthday.date.slice(5);
+          counts[dateKey] = (counts[dateKey] || 0) + 1;
+        }
+        return counts;
+      }
+
+      function getMonthDates(monthIndex, counts) {
+        const prefix = `${String(monthIndex + 1).padStart(2, "0")}-`;
+        return Object.entries(counts)
+          .filter(([dateKey]) => dateKey.startsWith(prefix))
+          .sort((first, second) => second[1] - first[1] || first[0].localeCompare(second[0]));
+      }
+
+      function formatDate(dateKey) {
+        const [month, day] = dateKey.split("-").map(Number);
+        return `${day} de ${months[month - 1].toLowerCase()}`;
+      }
+
+      function peopleLabel(count) {
+        return `${count} ${count === 1 ? "persona" : "personas"}`;
+      }
+
+      function renderMonthOverview(counts) {
+        monthGrid.innerHTML = months.map((month, index) => {
+          const dates = getMonthDates(index, counts);
+          const monthCount = dates.reduce((total, [, count]) => total + count, 0);
+          const preview = dates.slice(0, 3).map(([dateKey, count]) => `
+            <span class="month-preview-row birthday-name">${formatDate(dateKey)}: ${peopleLabel(count)}</span>`).join("");
+          const remaining = dates.length - 3;
+          const moreDates = remaining > 0
+            ? `<span class="month-more">${remaining} fechas más</span>`
+            : "";
+
+          return `
+            <button class="month-card month-open" id="mes-${month.toLowerCase()}" type="button" data-month="${index}" aria-label="Abrir ${month}, ${peopleLabel(monthCount)}">
+              <span class="month-title">
+                <span class="month-name">${month}</span>
+                <span class="month-count" aria-label="${peopleLabel(monthCount)}">${monthCount}</span>
+              </span>
+              <span class="month-preview">${preview || '<span class="month-empty">Sin cumpleaños registrados</span>'}${moreDates}</span>
+              <span class="month-open-label"><span>Abrir calendario</span><span aria-hidden="true">&rarr;</span></span>
+            </button>`;
+        }).join("");
+
+        countLabel.textContent = `${birthdays.length} cumpleaños`;
+      }
+
+      function renderPopularDates() {
+        const dates = Object.entries(getBirthdayCounts())
+          .sort((first, second) => second[1] - first[1] || first[0].localeCompare(second[0]))
+          .slice(0, 5);
+
+        popularList.innerHTML = dates.length
+          ? dates.map(([dateKey, count], index) => {
+            const [month, day] = dateKey.split("-").map(Number);
+            return `
+              <li class="popular-row">
+                <span class="popular-rank">${index + 1}</span>
+                <span class="popular-date">${formatDate(dateKey)}</span>
+                <span class="popular-count">${peopleLabel(count)}</span>
+                <button class="popular-open" type="button" data-open-date data-month="${month - 1}" data-day="${day}" aria-label="Ver ${formatDate(dateKey)}">Ver fecha</button>
+              </li>`;
+          }).join("")
+          : '<li class="popular-empty">Todavía no hay fechas registradas.</li>';
+      }
+
+      function renderMonthDetail(monthIndex) {
+        const counts = getBirthdayCounts();
+        const monthDates = getMonthDates(monthIndex, counts);
+        const year = new Date().getFullYear();
+        const firstWeekday = (new Date(year, monthIndex, 1).getDay() + 6) % 7;
+        const monthPrefix = `${String(monthIndex + 1).padStart(2, "0")}-`;
+        let daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+        for (const [dateKey] of monthDates) {
+          daysInMonth = Math.max(daysInMonth, Number(dateKey.slice(3)));
+        }
+
+        selectedMonthTitle.textContent = months[monthIndex];
+        selectedMonthCount.textContent = `${monthDates.reduce((total, [, count]) => total + count, 0)} cumpleaños`;
+        dayGrid.setAttribute("aria-label", `${months[monthIndex]}, ${year}`);
+
+        const cells = Array(firstWeekday).fill('<div class="day-cell is-empty" aria-hidden="true"></div>');
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dateKey = `${monthPrefix}${String(day).padStart(2, "0")}`;
+          const count = counts[dateKey] || 0;
+          const label = `${day} de ${months[monthIndex].toLowerCase()}`;
+          const savedBirthday = birthdays.find((birthday) => birthday.date.slice(5) === dateKey);
+          const birthdayRow = count
+            ? `<ul class="day-birthdays"><li class="day-birthday">
+                <span class="day-birthday-name">${label}: ${peopleLabel(count)}</span>
+                <button class="delete-button" type="button" data-delete-id="${savedBirthday.id}" aria-label="Eliminar una inscripción del ${label}">×</button>
+              </li></ul>`
+            : "";
+
+          cells.push(`<div class="day-cell" id="dia-${monthIndex + 1}-${day}" role="gridcell" aria-label="${label}, ${peopleLabel(count)}">
+            <span class="day-number">${day}</span>${birthdayRow}
+          </div>`);
+        }
+
+        while (cells.length % 7 !== 0) {
+          cells.push('<div class="day-cell is-empty" aria-hidden="true"></div>');
+        }
+
+        dayGrid.innerHTML = cells.join("");
+      }
+
+      function openMonth(monthIndex, day = null) {
+        activeMonth = monthIndex;
+        popularSection.hidden = true;
+        monthOverview.hidden = true;
+        monthDetail.hidden = false;
+        renderMonthDetail(monthIndex);
+        selectedMonthTitle.focus();
+
+        if (day !== null) {
+          document.getElementById(`dia-${monthIndex + 1}-${day}`).scrollIntoView({ block: "center", inline: "center" });
+        }
+      }
+
+      function renderBirthdays() {
+        renderMonthOverview(getBirthdayCounts());
+        renderPopularDates();
+        if (activeMonth !== null) renderMonthDetail(activeMonth);
+      }
+
+      function removeBirthday(id) {
+        birthdays = birthdays.filter((birthday) => birthday.id !== id);
+        if (saveBirthdays()) {
+          statusLabel.textContent = "Se eliminó una inscripción.";
+          renderBirthdays();
+        }
+      }
+
+      popularList.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-open-date]");
+        if (button) openMonth(Number(button.dataset.month), Number(button.dataset.day));
+      });
+
+      monthGrid.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-month]");
+        if (button) openMonth(Number(button.dataset.month));
+      });
+
+      dayGrid.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-delete-id]");
+        if (button) removeBirthday(button.dataset.deleteId);
+      });
+
+      const today = new Date();
+      dateInput.max = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
+      document.getElementById("back-to-months").addEventListener("click", () => {
+        const previousMonth = activeMonth;
+        activeMonth = null;
+        popularSection.hidden = false;
+        monthDetail.hidden = true;
+        monthOverview.hidden = false;
+        document.getElementById(`mes-${months[previousMonth].toLowerCase()}`).focus();
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+
+        const date = dateInput.value;
+        if (!date) return;
+
+        birthdays.push({ id: crypto.randomUUID(), date });
+        if (!saveBirthdays()) {
+          birthdays.pop();
+          return;
+        }
+
+        renderBirthdays();
+        form.reset();
+        statusLabel.textContent = "Fecha añadida al calendario.";
+        dateInput.focus();
+      });
+
+      renderBirthdays();
+    })();
+  </script>
+</body>
+</html>
